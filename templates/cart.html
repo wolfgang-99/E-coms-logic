@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Cart</title>
+</head>
+<body>
+    <h1>Shopping Cart</h1>
+    <ul>
+        {% for item in cart %}
+        <li>
+            <img src="{{ item.image_url }}" alt="{{ item.name }}" width="100" height="100">
+            {{ item.name }} - ${{ item.price }}
+            <form action="/remove_from_cart/{{ item.id }}" method="POST" style="display: inline;">
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="submit" value="Remove">
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <p>Total Price: ${{ total_price }}</p>
+    <p><a href="{{url_for('show_items')}}">Continue Shopping</a></p>
+</body>
+</html>

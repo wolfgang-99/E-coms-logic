@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Upload</title>
+</head>
+<body>
+
+    <div class="comment-box">
+        <h1>Upload products</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <p>
+                <label for="product_name"> product name </label>
+                <input type="text" id="product_name" name="product_name" placeholder="Enter your product name " required>
+            </p>
+
+            <p>
+                <label for="product_price"> product price </label>
+                <input type="text" id="product_price" name="product_price" placeholder="Enter your product price" required>
+            </p>
+
+            <p>
+                <label for="product_id"> product ID </label>
+                <input type="text" id="product_id" name="product_id" placeholder="Enter your product id" required>
+
+            </p>
+
+            <p>
+              <label for="product_description">Your product description:</label>
+                <textarea id="product_description" name="product_description" rows="4" placeholder="Enter your product description here" required></textarea>
+                <br>
+
+            </p>
+
+            <input type="file" name="image" accept="image/*" required>
+           <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+
+</body>
+</html>

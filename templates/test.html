@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>product Gallery</title>
+</head>
+<body>
+    <h1>product Gallery</h1>
+    <div class="image-gallery">
+
+        {% for product in product_documents %}
+        <div class="image-item">
+            <img src="{{ url_for('get_image', filename=product.filename) }}" alt="{{ product.filename }}" width="100" height="100">
+            {{ product.product_details.product_name }} - ${{ product.product_details.product_price }}
+            <br> <br>
+            <h4> product description </h4>
+            <P> {{ product.product_details.product_description }}</P>
+        <a href="/add_to_cart/{{ product.id }}">Add to Cart</a>
+
+        </div>
+        <br> <br>
+        {% endfor %}
+    </div>
+
+    <p><a href="/cart">View Cart</a></p>
+
+</body>
+</html>
