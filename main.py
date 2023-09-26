@@ -83,7 +83,6 @@ def get_image(filename):
         return Response(get_image['retrieved_image'], content_type=get_image['format'])
 
 
-
 @app.route('/items')
 def show_items():
 
@@ -101,7 +100,7 @@ def show_items():
     return render_template('item.html', product_documents=product_documents)
 
 
-@app.route('/add_to_cart/<int:product_id>')
+@app.route('/add_to_cart/<product_id>')
 def add_to_cart(product_id):
     # Establish a connection to MongoDB
     client = MongoClient(MONGODB_URL)
@@ -112,6 +111,18 @@ def add_to_cart(product_id):
 
     # Retrieve a list of image documents from MongoDB
     product_documents = image_collection.find()
+
+    product_documents = [
+        {
+            **product,
+            '_id': str(product['_id']),
+            'product_details': {
+                **product['product_details'],
+
+            }
+        }
+        for product in product_documents
+    ]
 
     product = next((p for p in product_documents if p['product_details']['product_id'] == product_id), None)
     if product:
@@ -124,8 +135,11 @@ def add_to_cart(product_id):
 
 @app.route('/cart')
 def view_cart():
-    cart = session['cart']
-    total_price = sum(item['price'] for item in cart)
+    cart = session.get('cart', [])  # Use get() to handle the case when 'cart' is not in the session
+    total_price = sum(
+        int(item['product_details']['product_price'].replace('$', '').strip())
+        for item in cart
+    )
     return render_template('cart.html', cart=cart, total_price=total_price)
 
 
