@@ -228,3 +228,17 @@ def retrieve_image(filename):
     else:
         return "image retrival failed "
 
+
+def get_product(product_id):
+    """ this get a product using the product_id given it """
+    # Establish a connection to MongoDB
+    client = MongoClient(MONGODB_URL)
+    db = client['E_coms_logic']
+
+    # Create a collection to store images
+    image_collection = db['images']
+
+    # Find the selected product in the database by product_id
+    product = image_collection.find_one({'product_details.product_id': product_id})
+
+    return product

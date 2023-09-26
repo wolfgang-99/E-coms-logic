@@ -1,6 +1,7 @@
 import os
 from pymongo import MongoClient
-from server import retrieve_image, read_message, validate_product_image, authenticate_user, create_user_account,secure_filename
+from server import retrieve_image, read_message, validate_product_image, get_product, authenticate_user, \
+    create_user_account, secure_filename
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Email, Length
@@ -10,12 +11,10 @@ MONGODB_URL = "mongodb+srv://demo:UHd7EzjhREZFkq8d@cluster0.06gzzsk.mongodb.net/
 app = Flask(__name__)
 app.secret_key = "any-string-you-want-just-keep-it-secret"
 
-
 # Create a directory to store uploaded images
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
 
 
 class LoginForm(FlaskForm):
@@ -42,6 +41,7 @@ def login():
     if login_form.validate_on_submit():
         print(login_form.email.data)
     return render_template('login.html', form=login_form)
+
 
 @app.route("/logout")
 def logout():
@@ -91,7 +91,6 @@ def get_image(filename):
 
 @app.route('/items')
 def show_items():
-
     # Establish a connection to MongoDB
     client = MongoClient(MONGODB_URL)
     db = client['E_coms_logic']
@@ -108,36 +107,28 @@ def show_items():
 
 @app.route('/add_to_cart/<product_id>')
 def add_to_cart(product_id):
-    # Establish a connection to MongoDB
-    client = MongoClient(MONGODB_URL)
-    db = client['E_coms_logic']
+    # # Find the selected product in the database by calling the function get_product
+    # product = get_product(product_id)
+    # if product:
+    #     # Convert the '_id' ObjectId to a string
+    #     product['_id'] = str(product['_id'])
 
-    # Create a collection to store images
-    image_collection = db['images']
-
-    # Find the selected product in the database by product_id
-    product = image_collection.find_one({'product_details.product_id': product_id})
-
-    if product:
-        # Convert the '_id' ObjectId to a string
-        product['_id'] = str(product['_id'])
-
-        cart = session.get('cart', [])  # Use get() to handle the case when 'cart' is not in the session
-        if product not in cart:
-            cart.append(product)
-            session['cart'] = cart
+    cart = session.get('cart', [])  # Use get() to handle the case when 'cart' is not in the session
+    if product_id not in cart:
+        cart.append(product_id)
+        session['cart'] = cart
     return redirect(url_for('show_items'))
-
 
 
 @app.route('/cart')
 def view_cart():
     cart = session.get('cart', [])  # Use get() to handle the case when 'cart' is not in the session
+    product_in_cart = [get_product(product_id=id) for id in cart]
     total_price = sum(
-        int(item['product_details']['product_price'].replace('$', '').strip())
-        for item in cart
+        int(product['product_details']['product_price'].replace('$', '').strip())
+        for product in product_in_cart
     )
-    return render_template('cart.html', cart=cart, total_price=total_price)
+    return render_template('cart.html', products=product_in_cart, total_price=total_price)
 
 
 @app.route('/remove_from_cart/<product_id>', methods=['POST'])
