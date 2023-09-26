@@ -11,7 +11,7 @@
         <li>
             <img src="{{ url_for('get_image', filename=item.filename) }}" alt="{{ item.filename }}" width="100" height="100">
             {{ item.product_details.product_name  }} - ${{ item.product_details.product_price}}
-            <form action="/remove_from_cart/{{ item.id }}" method="POST" style="display: inline;">
+            <form action="/remove_from_cart/{{ item.product_details.product_id }}" method="POST" style="display: inline;">
                 <input type="hidden" name="_method" value="DELETE">
                 <input type="submit" value="Remove">
             </form>

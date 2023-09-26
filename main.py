@@ -4,7 +4,7 @@ from server import retrieve_image, read_message, validate_product_image, authent
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Email, Length
-from flask import Flask, render_template, session, redirect, url_for, Response, request
+from flask import Flask, render_template, session, redirect, url_for, Response, request, flash
 
 MONGODB_URL = "mongodb+srv://demo:UHd7EzjhREZFkq8d@cluster0.06gzzsk.mongodb.net/?retryWrites=true&w=majority"
 app = Flask(__name__)
@@ -42,6 +42,12 @@ def login():
     if login_form.validate_on_submit():
         print(login_form.email.data)
     return render_template('login.html', form=login_form)
+
+@app.route("/logout")
+def logout():
+    session.pop("car", None)
+    flash('you have logged out', 'info')
+    return redirect(url_for("home"))
 
 
 @app.route('/admin')
@@ -109,28 +115,19 @@ def add_to_cart(product_id):
     # Create a collection to store images
     image_collection = db['images']
 
-    # Retrieve a list of image documents from MongoDB
-    product_documents = image_collection.find()
+    # Find the selected product in the database by product_id
+    product = image_collection.find_one({'product_details.product_id': product_id})
 
-    product_documents = [
-        {
-            **product,
-            '_id': str(product['_id']),
-            'product_details': {
-                **product['product_details'],
-
-            }
-        }
-        for product in product_documents
-    ]
-
-    product = next((p for p in product_documents if p['product_details']['product_id'] == product_id), None)
     if product:
-        cart = session['cart']
+        # Convert the '_id' ObjectId to a string
+        product['_id'] = str(product['_id'])
+
+        cart = session.get('cart', [])  # Use get() to handle the case when 'cart' is not in the session
         if product not in cart:
             cart.append(product)
             session['cart'] = cart
     return redirect(url_for('show_items'))
+
 
 
 @app.route('/cart')
@@ -143,11 +140,11 @@ def view_cart():
     return render_template('cart.html', cart=cart, total_price=total_price)
 
 
-@app.route('/remove_from_cart/<int:product_id>', methods=['POST'])
+@app.route('/remove_from_cart/<product_id>', methods=['POST'])
 def remove_from_cart(product_id):
-    cart = session['cart']
+    cart = session.get('cart', [])  # Use get() to handle the case when 'cart' is not in the session
     for item in cart:
-        if item['id'] == product_id:
+        if item['product_details']['product_id'] == product_id:
             cart.remove(item)
             session['cart'] = cart
             break
