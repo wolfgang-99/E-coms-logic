@@ -135,7 +135,7 @@ def view_cart():
 def remove_from_cart(product_id):
     cart = session.get('cart', [])  # Use get() to handle the case when 'cart' is not in the session
     for item in cart:
-        if item['product_details']['product_id'] == product_id:
+        if item == product_id:
             cart.remove(item)
             session['cart'] = cart
             break

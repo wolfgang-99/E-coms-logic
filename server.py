@@ -231,6 +231,7 @@ def retrieve_image(filename):
 
 def get_product(product_id):
     """ this get a product using the product_id given it """
+
     # Establish a connection to MongoDB
     client = MongoClient(MONGODB_URL)
     db = client['E_coms_logic']
